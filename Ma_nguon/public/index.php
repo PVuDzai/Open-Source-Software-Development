@@ -3,7 +3,9 @@ require __DIR__ . '/../src/Input.php';
 require __DIR__ . '/../src/EventFilter.php';
 $events = require __DIR__ . '/../data/events.php';
 $query = field($_GET, 'q');
-$visible = filterEvents($events, $query);
+$category = field($_GET, 'category');
+$availableOnly = field($_GET, 'available') === '1';
+$visible = filterEvents($events, $query, $category, $availableOnly);
 require_once __DIR__ . '/../templates/event-presentation.php';
 require __DIR__ . '/../templates/header.php';
 ?>
@@ -13,7 +15,18 @@ require __DIR__ . '/../templates/header.php';
 </div>
 <form class="search-form" method="get">
     <label class="form-field" for="q">Từ khóa
-<input id="q" name="q" value="<?= e($query) ?>">
+        <input id="q" name="q" value="<?= e($query) ?>">
+    </label>
+    <label class="form-field" for="category">Loại
+        <select id="category" name="category">
+            <option value="">Tất cả</option>
+            <option value="tech" <?= $category === 'tech' ? 'selected' : '' ?>>tech</option>
+            <option value="design" <?= $category === 'design' ? 'selected' : '' ?>>design</option>
+        </select>
+    </label>
+    <label class="form-field" for="available">
+        <input type="checkbox" id="available" name="available" value="1" <?= $availableOnly ? 'checked' : '' ?>>
+        Chỉ còn chỗ
     </label>
     <button>Tìm</button>
 </form>
@@ -29,7 +42,7 @@ require __DIR__ . '/../templates/header.php';
 <div class="event-card-content">
         <h2 class="event-title"><?= e($event['title']) ?></h2>
 <p class="event-date"><?= e(uiDate($content['start'])) ?></p>
-<p class="event-venue"><?= e($content['venue']) ?></p>
+<p class="event-venue"><?= e(uiDate($content['start']) !== '' ? $content['venue'] : $content['venue']) ?></p>
 <p><?= e($content['summary']) ?></p>
 <p class="event-meta">
         Loại: <?= e($event['category']) ?>. 
